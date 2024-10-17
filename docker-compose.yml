@@ -1,0 +1,53 @@
+version: '3'  
+services:
+  php:
+    build: .
+    container_name: php
+    volumes:
+      - ./php-app:/var/www/html
+    ports:
+      - "8080:80"
+    networks:
+      - umanlink-network
+    restart: always
+    depends_on:
+      - db
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - umanlink-network
+
+  db:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./sql_migration:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # MySQL root password
+      MYSQL_DATABASE: db1         # Automatically create db1
+      MYSQL_USER: user1           # Create a user1
+      MYSQL_PASSWORD: 123456      # Set password for user1
+    networks:
+      - umanlink-network
+    restart: always
+
+volumes:
+  db_data:
+
+networks:
+  umanlink-network:
+    driver: bridge
+
